@@ -1,7 +1,6 @@
 import pygame
 from game_classes import all_pieces, sprites
 import logistics
-from logistics import cur_turn
 
 class Window:
     def __init__(self, width=600, height=600, board_color="Gray"):

@@ -372,6 +372,11 @@ class Player:
                 Pawn(0, all_squares['g7']),
                 Queen(0, all_squares['d5'])
             ]
+        self.is_in_check = False
+
+
+
+
 
 
 white_player = Player(name="White", color=1)

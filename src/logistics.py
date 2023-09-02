@@ -1,10 +1,12 @@
 import pygame
 import game_classes
 from game_classes import  \
-    Piece, all_pieces, all_squares, Square
+    Piece, all_pieces, all_squares, Square, \
+    white_player, black_player
 
 
-cur_turn = 1
+cur_turn_player = white_player
+players = [black_player, white_player]
 def get_dragged_piece():
     if any(filter(lambda piece: piece.is_dragged, all_pieces)):  # if there is already a dragged piece
         return get_cur_dragged_piece()
@@ -16,7 +18,7 @@ def get_dragged_piece():
         #print(all_pieces)
         if touched_square.occupied_by is piece \
         or piece.is_dragged:
-            if piece.color == cur_turn:
+            if piece.color == cur_turn_player.color:
                 piece.is_dragged = True
                 return piece
 
@@ -63,7 +65,8 @@ def move_piece(piece: Piece):
     piece.square.occupied_by = None
 
     print(f"moving {piece} to {desired_square}")
-    globals()['cur_turn'] = int(not cur_turn)  # change global variable
+    globals()['cur_turn_player'] = players[
+        int(not cur_turn_player.color)]  # change player's turn
 
     piece.square = desired_square
 
