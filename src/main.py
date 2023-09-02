@@ -1,6 +1,7 @@
 import pygame
-from pieces import all_pieces, sprites
+from game_classes import all_pieces, sprites
 import logistics
+from logistics import cur_turn
 
 class Window:
     def __init__(self, width=600, height=600, board_color="Gray"):
@@ -16,7 +17,6 @@ class Window:
         self.board = pygame.image.load(f'../Sprites/Boards/{self.board_color}Board.jpg').convert()
 
         self.stop_game = False
-
     def draw_window(self):
         self.window.blit(self.board, (0, 0))
 
@@ -26,6 +26,7 @@ class Window:
         pygame.display.update()
 
 game_window = Window(width=600, height=600, board_color='Gray')
+
 
 while not game_window.stop_game:
     events = pygame.event.get()
@@ -48,6 +49,7 @@ while not game_window.stop_game:
     else:
         if dragged_piece:
             logistics.move_piece(dragged_piece)
+
     game_window.draw_window()
 
 pygame.quit()

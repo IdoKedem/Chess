@@ -1,5 +1,4 @@
-from src import base_objects
-from base_objects import Square, Piece, get_coords_by_xy
+from base_classes import Square, Piece, all_squares
 import pygame
 
 
@@ -22,20 +21,20 @@ class Pawn(Piece):
                 squares_to_check = 2
 
         for square_num in range(1, squares_to_check + 1):
-            cur_square_coords = get_coords_by_xy(piece.square.x,
+            cur_square_coords = Square.get_coords_by_xy(piece.square.x,
                                                  piece.square.y + y_change * square_num)
             cur_square = all_squares[cur_square_coords]
 
             if square_num == 1:  # check takes
                 if piece.x != 7 * 75: #not on h file
-                    east_square_coords = get_coords_by_xy(cur_square.x + 75, cur_square.y)
+                    east_square_coords = Square.get_coords_by_xy(cur_square.x + 75, cur_square.y)
                     east_square = all_squares[east_square_coords]
                     if east_square.occupied_by \
                     and east_square.occupied_by.color != piece.color:
                         legal_squares.add(east_square)
 
                 if piece.x != 0: #not on a file
-                    west_square_coords = get_coords_by_xy(cur_square.x - 75, cur_square.y)
+                    west_square_coords = Square.get_coords_by_xy(cur_square.x - 75, cur_square.y)
                     west_square = all_squares[west_square_coords]
                     if west_square.occupied_by \
                     and west_square.occupied_by.color != piece.color:
@@ -97,7 +96,7 @@ class Rook(Piece):
 
         if is_check_row:
             for cur_square_x in squares_range_x:
-                cur_square_coords = get_coords_by_xy(cur_square_x, square_y)
+                cur_square_coords = Square.get_coords_by_xy(cur_square_x, square_y)
                 cur_square = all_squares[cur_square_coords]
 
                 if cur_square.occupied_by:
@@ -107,7 +106,7 @@ class Rook(Piece):
                 legal_squares.add(cur_square)
         else:
             for cur_square_y in squares_range_y:
-                cur_square_coords = get_coords_by_xy(square_x, cur_square_y)
+                cur_square_coords = Square.get_coords_by_xy(square_x, cur_square_y)
                 cur_square = all_squares[cur_square_coords]
 
                 if cur_square.occupied_by:
@@ -163,7 +162,7 @@ class Bishop(Piece):
         for cur_square_x in squares_range_x:
             cur_square_y = slope * (cur_square_x - square_x) + square_y
 
-            square_coord = base_objects.get_coords_by_xy(cur_square_x, cur_square_y)
+            square_coord = Square.get_coords_by_xy(cur_square_x, cur_square_y)
             if square_coord not in all_squares.keys():
                 break
             square = all_squares[square_coord]
@@ -222,11 +221,11 @@ class Knight(Piece):
                 raise ValueError("direction must be 'n', 's', 'e' or 'w'")
 
         if check_x_axis:
-            possible_squares.add(get_coords_by_xy(square_x, square_y + 75))
-            possible_squares.add(get_coords_by_xy(square_x, square_y - 75))
+            possible_squares.add(Square.get_coords_by_xy(square_x, square_y + 75))
+            possible_squares.add(Square.get_coords_by_xy(square_x, square_y - 75))
         else:
-            possible_squares.add(get_coords_by_xy(square_x + 75, square_y))
-            possible_squares.add(get_coords_by_xy(square_x - 75, square_y))
+            possible_squares.add(Square.get_coords_by_xy(square_x + 75, square_y))
+            possible_squares.add(Square.get_coords_by_xy(square_x - 75, square_y))
 
         for square in possible_squares:
             if square in all_squares:
@@ -282,12 +281,12 @@ class King(Piece):
 
         if check_x_axis:
             for y_change in range(-1, 2):
-                square_coords = get_coords_by_xy(square_x, square_y + 75 * y_change)
+                square_coords = Square.get_coords_by_xy(square_x, square_y + 75 * y_change)
                 if square_coords in all_squares:
                     possible_squares.add(all_squares[square_coords])
         else:
             for x_change in range(-1, 2):
-                square_coords = get_coords_by_xy(square_x + 75 * x_change, square_y)
+                square_coords = Square.get_coords_by_xy(square_x + 75 * x_change, square_y)
                 if square_coords in all_squares:
                     possible_squares.add(all_squares[square_coords])
 
@@ -356,33 +355,41 @@ class Queen(Piece):
         #print(*self.legal_squares)
 
 
-all_squares = base_objects.all_squares
+class Player:
+    def __init__(self, name: str, color: int):
+        self.name = name
+        self.color = color
 
-rook = Rook(1, all_squares['a4'])
-bishop = Bishop(1, all_squares['b4'])
+        if color == 1:  # white
+            self.pieces = [
+                Rook(1, all_squares['a4']),
+                Bishop(1, all_squares['b4']),
+                King(1, all_squares['b5'])
+            ]
+        else:  # black
+            self.pieces = [
+                Knight(0, all_squares['g4']),
+                Pawn(0, all_squares['g7']),
+                Queen(0, all_squares['d5'])
+            ]
 
-knight = Knight(0, all_squares['g4'])
-pawn = Pawn(0, all_squares['g7'])
 
-king = King(1, all_squares['b5'])
+white_player = Player(name="White", color=1)
+black_player = Player(name="Black", color=0)
 
-queen = Queen(0, all_squares['d5'])
-
-
-white_pieces = [rook, bishop, king]
-black_pieces = [knight, pawn, queen]
+white_pieces = white_player.pieces
+black_pieces = black_player.pieces
 all_pieces = white_pieces + black_pieces
 
 def update_legal_moves():
     for piece in all_pieces:
-        if issubclass(type(piece), Piece):
             piece.update_legal_squares()
 
 update_legal_moves()
 
 def get_touched_square():
     mouse_x, mouse_y = pygame.mouse.get_pos()
-    index = base_objects.get_coords_by_xy(mouse_x, mouse_y)
+    index = Square.get_coords_by_xy(mouse_x, mouse_y)
     #print(mouse_x)
     #print(mouse_y)
 
@@ -403,3 +410,9 @@ def remove_piece(piece):
 
     del sprites[piece]
     print("removed")
+
+
+
+
+
+

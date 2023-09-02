@@ -12,6 +12,15 @@ class Square:
 
     def __str__(self):
         return self.coord
+    @staticmethod
+    def get_coords_by_xy(x, y):
+        letter = x // Square.width
+        number = 8 - y // Square.height
+
+        index = chr(ord('a') + letter) + str(number)
+        return index
+
+
 def get_squares():
     x, y = 0, 0
     squares = {}
@@ -59,9 +68,7 @@ class Piece:
 
 
 
-def get_coords_by_xy(x, y):
-    letter = x // Square.width
-    number = 8 - y // Square.height
 
-    index = chr(ord('a') + letter) + str(number)
-    return index
+
+
+
