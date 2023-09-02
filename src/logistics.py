@@ -1,6 +1,7 @@
 import pygame
 import game_classes
-from game_classes import Piece, all_pieces
+from game_classes import  \
+    Piece, all_pieces, all_squares, Square
 
 
 cur_turn = 1
@@ -8,7 +9,7 @@ def get_dragged_piece():
     if any(filter(lambda piece: piece.is_dragged, all_pieces)):  # if there is already a dragged piece
         return get_cur_dragged_piece()
 
-    touched_square = pieces.get_touched_square()
+    touched_square = get_touched_square()
     #print("touched square", touched_square)
 
     for piece in all_pieces:
@@ -43,7 +44,7 @@ def move_piece(piece: Piece):
 
     piece.is_dragged = False
 
-    desired_square = pieces.get_touched_square()
+    desired_square = get_touched_square()
     if desired_square not in piece.legal_squares:
         piece.x, piece.y = piece.square.x, piece.square.y
         return
@@ -56,7 +57,7 @@ def move_piece(piece: Piece):
             piece.x, piece.y = piece.square.x, piece.square.y
             return
         else:
-            pieces.remove_piece(occupied_by)
+            game_classes.remove_piece(occupied_by)
 
 
     piece.square.occupied_by = None
@@ -70,6 +71,15 @@ def move_piece(piece: Piece):
 
     desired_square.occupied_by = piece
 
-    pieces.update_legal_moves()
+    game_classes.update_legal_moves()
 
 
+def get_touched_square():
+    mouse_x, mouse_y = pygame.mouse.get_pos()
+    index = Square.get_coords_by_xy(mouse_x, mouse_y)
+    #print(mouse_x)
+    #print(mouse_y)
+
+    #print(index)
+
+    return all_squares[index]

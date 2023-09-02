@@ -387,15 +387,7 @@ def update_legal_moves():
 
 update_legal_moves()
 
-def get_touched_square():
-    mouse_x, mouse_y = pygame.mouse.get_pos()
-    index = Square.get_coords_by_xy(mouse_x, mouse_y)
-    #print(mouse_x)
-    #print(mouse_y)
 
-    #print(index)
-
-    return all_squares[index]
 
 sprites = {}
 for piece in all_pieces:
