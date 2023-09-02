@@ -1,3 +1,5 @@
+
+
 class Square:
     width, height = 75, 75
 
@@ -10,9 +12,6 @@ class Square:
 
     def __str__(self):
         return self.coord
-
-
-
 def get_squares():
     x, y = 0, 0
     squares = {}
@@ -28,6 +27,35 @@ def get_squares():
     return {index: squares[index] for index in sorted(squares.keys())}
 
 all_squares = get_squares()
+
+
+class Piece:
+    width, height = 75, 75
+    def __init__(self, color: int, type: str, square: Square):
+
+        self.is_dragged = False
+
+        self.color = color
+
+        self.square = square
+        self.square.occupied_by = self
+
+        self.x = self.square.x
+        self.y = self.square.y
+
+        self.type = type
+        if color == 1:
+            self.str_color = 'White'
+        else:
+            self.str_color = 'Black'
+
+        self.sprite = f'../Sprites/Pieces/{self.str_color}/{self.color}Chess_{self.type}.png'
+
+        self.legal_squares = set()
+
+    def __str__(self):
+        return f"{self.str_color} {self.type} on {self.square}"
+
 
 
 

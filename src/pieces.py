@@ -1,56 +1,29 @@
 from src import base_objects
-from base_objects import Square, get_coords_by_xy
+from base_objects import Square, Piece, get_coords_by_xy
 import pygame
 
-
-class Piece:
-    width, height = 75, 75
-    def __init__(self, color: int, type: str, square: Square):
-
-        self.is_dragged = False
-
-        self.color = color
-
-        self.square = square
-        self.square.occupied_by = self
-
-        self.x = self.square.x
-        self.y = self.square.y
-
-        self.type = type
-        if color == 1:
-            self.str_color = 'White'
-        else:
-            self.str_color = 'Black'
-
-        self.sprite = f'../Sprites/Pieces/{self.str_color}/{self.color}Chess_{self.type}.png'
-
-        self.legal_squares = set()
-
-    def __str__(self):
-        return f"{self.str_color} {self.type} on {self.square}"
 
 
 class Pawn(Piece):
 
     @staticmethod
-    def get_movement(piece, is_check_en_passant=False):
+    def get_movement(piece):
+        #TODO add en passant logic
         legal_squares = set()
-        diagonally_legal_squares = set()
 
         squares_to_check = 1
         if piece.color == 1:
             y_change = -75
-            if piece.square.coord[1] == '2':
+            if piece.square.coord[1] == '2':  # on second rank
                 squares_to_check = 2
         else:
             y_change = 75
-            if piece.square.coord[1] == '7':
+            if piece.square.coord[1] == '7':  # on 7th rank
                 squares_to_check = 2
 
         for square_num in range(1, squares_to_check + 1):
             cur_square_coords = get_coords_by_xy(piece.square.x,
-                                                              piece.square.y + y_change * square_num)
+                                                 piece.square.y + y_change * square_num)
             cur_square = all_squares[cur_square_coords]
 
             if square_num == 1:  # check takes
@@ -60,7 +33,6 @@ class Pawn(Piece):
                     if east_square.occupied_by \
                     and east_square.occupied_by.color != piece.color:
                         legal_squares.add(east_square)
-                        diagonally_legal_squares.add(east_square)
 
                 if piece.x != 0: #not on a file
                     west_square_coords = get_coords_by_xy(cur_square.x - 75, cur_square.y)
@@ -68,13 +40,12 @@ class Pawn(Piece):
                     if west_square.occupied_by \
                     and west_square.occupied_by.color != piece.color:
                         legal_squares.add(west_square)
-                        diagonally_legal_squares.add(west_square)
 
                 if cur_square.occupied_by: # back to checking movement
                     break
             if not cur_square.occupied_by:
                 legal_squares.add(cur_square)
-        return legal_squares, diagonally_legal_squares
+        return legal_squares
 
     def __init__(self, color: int, square: Square):
         super().__init__(color, "pawn", square)
@@ -83,10 +54,13 @@ class Pawn(Piece):
     def update_legal_squares(self):
         self.legal_squares = set()
 
-        all_legal_squares, diagonally_legal_squares = self.get_movement(self)
+        all_legal_squares = self.get_movement(self)
 
         self.legal_squares.update(all_legal_squares)
-        self.diagonally_legal_squares.update(diagonally_legal_squares)
+        for square in self.legal_squares:
+            if square.x != self.x:  # is diagonal to me
+                self.diagonally_legal_squares.add(square)
+
         print(*self.diagonally_legal_squares)
 
 
@@ -362,7 +336,7 @@ class Queen(Piece):
         super().__init__(color, "queen", square)
 
     @staticmethod
-    def get_movement(piece, direction):
+    def get_movement(piece, direction: str):
         legal_squares = set()
 
         if len(direction) == 1: # n, e, s or w
