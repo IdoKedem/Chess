@@ -26,7 +26,6 @@ class Window:
 
 game_window = Window(width=600, height=600, board_color='Gray')
 
-
 while not game_window.stop_game:
     events = pygame.event.get()
     for event in events:

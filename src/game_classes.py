@@ -1,4 +1,5 @@
 from base_classes import Square, Piece, all_squares
+from typing import List, Optional
 import pygame
 
 
@@ -46,8 +47,8 @@ class Pawn(Piece):
                 legal_squares.add(cur_square)
         return legal_squares
 
-    def __init__(self, color: int, square: Square):
-        super().__init__(color, "pawn", square)
+    def __init__(self, owner, square: Square):
+        super().__init__(owner, "pawn", square)
         self.diagonally_legal_squares = set()
 
     def update_legal_squares(self):
@@ -117,8 +118,8 @@ class Rook(Piece):
         return legal_squares
 
 
-    def __init__(self, color: int, square: Square):
-        super().__init__(color, "rook", square)
+    def __init__(self, owner, square: Square):
+        super().__init__(owner, "rook", square)
 
 
     def update_legal_squares(self):
@@ -175,8 +176,8 @@ class Bishop(Piece):
         return legal_squares
 
 
-    def __init__(self, color: int, square: Square):
-        super().__init__(color, "bishop", square)
+    def __init__(self, owner, square: Square):
+        super().__init__(owner, "bishop", square)
 
     def update_legal_squares(self):
         self.legal_squares = set()
@@ -233,8 +234,8 @@ class Knight(Piece):
         return legal_squares
 
 
-    def __init__(self, color, square):
-        super().__init__(color, 'Knight', square)
+    def __init__(self, owner, square):
+        super().__init__(owner, 'Knight', square)
 
     def update_legal_squares(self):
         self.legal_squares = set()
@@ -301,8 +302,8 @@ class King(Piece):
 
 
 
-    def __init__(self, color, square):
-        super().__init__(color, 'king', square)
+    def __init__(self, owner, square):
+        super().__init__(owner, 'king', square)
 
     def update_legal_squares(self):
         self.legal_squares = set()
@@ -331,8 +332,8 @@ class King(Piece):
         #print("-------")
 
 class Queen(Piece):
-    def __init__(self, color, square):
-        super().__init__(color, "queen", square)
+    def __init__(self, owner, square):
+        super().__init__(owner, "queen", square)
 
     @staticmethod
     def get_movement(piece, direction: str):
@@ -362,33 +363,46 @@ class Player:
 
         if color == 1:  # white
             self.pieces = [
-                Rook(1, all_squares['a4']),
-                Bishop(1, all_squares['b4']),
-                King(1, all_squares['b5'])
+                King(self, all_squares['b5']),
+                Rook(self, all_squares['a4']),
+                Bishop(self, all_squares['b4']),
             ]
         else:  # black
             self.pieces = [
-                Knight(0, all_squares['g4']),
-                Pawn(0, all_squares['g7']),
-                Queen(0, all_squares['d5'])
+                Knight(self, all_squares['g4']),
+                Pawn(self, all_squares['g7']),
+                Queen(self, all_squares['d5'])
             ]
+        self.king = self.pieces[0]
         self.is_in_check = False
+        self.all_legal_squares = set()
 
-
+    def update_legal_squares(self):
+        for piece in self.pieces:
+            piece.update_legal_squares()
+            self.all_legal_squares.update(
+                piece.legal_squares)
+    def get_all_legal_squares(self):
+        return self.all_legal_squares
 
 
 
 
 white_player = Player(name="White", color=1)
 black_player = Player(name="Black", color=0)
+players_list: List[Player] = [black_player, white_player]
 
 white_pieces = white_player.pieces
 black_pieces = black_player.pieces
 all_pieces = white_pieces + black_pieces
 
-def update_legal_moves():
-    for piece in all_pieces:
-            piece.update_legal_squares()
+def update_legal_moves(
+        players: Optional[List[Player]]=None):
+    if not players:
+        players = players_list
+    for player in players:
+        player.update_legal_squares()
+
 
 update_legal_moves()
 

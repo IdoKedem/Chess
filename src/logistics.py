@@ -2,11 +2,14 @@ import pygame
 import game_classes
 from game_classes import  \
     Piece, all_pieces, all_squares, Square, \
-    white_player, black_player
+    Player, players_list
+from typing import List
 
 
-cur_turn_player = white_player
-players = [black_player, white_player]
+cur_turn_player: Player = players_list[1] # white
+
+
+
 def get_dragged_piece():
     if any(filter(lambda piece: piece.is_dragged, all_pieces)):  # if there is already a dragged piece
         return get_cur_dragged_piece()
@@ -16,11 +19,15 @@ def get_dragged_piece():
 
     for piece in all_pieces:
         #print(all_pieces)
-        if touched_square.occupied_by is piece \
-        or piece.is_dragged:
-            if piece.color == cur_turn_player.color:
-                piece.is_dragged = True
-                return piece
+        if not(
+           touched_square.occupied_by is piece or piece.is_dragged):
+            continue
+
+        if piece.color != cur_turn_player.color:
+            continue
+
+        piece.is_dragged = True
+        return piece
 
 
 def get_cur_dragged_piece():
@@ -51,30 +58,32 @@ def move_piece(piece: Piece):
         piece.x, piece.y = piece.square.x, piece.square.y
         return
 
-    occupied_by = desired_square.occupied_by
+    occupying_piece = desired_square.occupied_by
 
-    if occupied_by:
-        if occupied_by.color == piece.color or occupied_by is piece:
+    if occupying_piece:
+        if occupying_piece.color == piece.color or occupying_piece is piece:
             #print("cant take your own piece")
             piece.x, piece.y = piece.square.x, piece.square.y
             return
         else:
-            game_classes.remove_piece(occupied_by)
-
+            game_classes.remove_piece(occupying_piece)
 
     piece.square.occupied_by = None
 
     print(f"moving {piece} to {desired_square}")
-    globals()['cur_turn_player'] = players[
+
+    last_turn_player = cur_turn_player
+    globals()['cur_turn_player']: Player = \
+        players_list[
         int(not cur_turn_player.color)]  # change player's turn
 
     piece.square = desired_square
-
     piece.x, piece.y = desired_square.x, desired_square.y
-
     desired_square.occupied_by = piece
 
-    game_classes.update_legal_moves()
+    game_classes.update_legal_moves([last_turn_player])
+    look_for_checks(last_turn_player=last_turn_player,
+                    cur_turn_player=cur_turn_player)
 
 
 def get_touched_square():
@@ -86,3 +95,9 @@ def get_touched_square():
     #print(index)
 
     return all_squares[index]
+
+def look_for_checks(last_turn_player, cur_turn_player):
+    cur_turn_player.is_in_check = \
+        cur_turn_player.king in \
+        last_turn_player.all_legal_squares
+    game_classes.update_legal_moves([cur_turn_player])

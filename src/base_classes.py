@@ -40,11 +40,11 @@ all_squares = get_squares()
 
 class Piece:
     width, height = 75, 75
-    def __init__(self, color: int, type: str, square: Square):
+    def __init__(self, owner, type: str, square: Square):
 
         self.is_dragged = False
 
-        self.color = color
+        self.color = owner.color
 
         self.square = square
         self.square.occupied_by = self
@@ -53,7 +53,7 @@ class Piece:
         self.y = self.square.y
 
         self.type = type
-        if color == 1:
+        if owner == 1:
             self.str_color = 'White'
         else:
             self.str_color = 'Black'
