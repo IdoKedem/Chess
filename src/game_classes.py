@@ -201,7 +201,7 @@ class Knight(Piece):
         legal_squares = set()
 
         check_x_axis = False
-        possible_squares = set()
+        possible_squares: set[Square] = set()
 
         match direction:
             case 'n':
@@ -229,8 +229,13 @@ class Knight(Piece):
             possible_squares.add(Square.get_coords_by_xy(square_x - 75, square_y))
 
         for square in possible_squares:
-            if square in all_squares:
+            if square not in all_squares:
+                continue
+            square_obj = all_squares[square]
+            if (square_obj.occupied_by is None or
+                square_obj.occupied_by.color != piece.color):
                 legal_squares.add(all_squares[square])
+
         return legal_squares
 
 
@@ -300,8 +305,6 @@ class King(Piece):
 
         return legal_squares
 
-
-
     def __init__(self, owner, square):
         super().__init__(owner, 'king', square)
 
@@ -369,6 +372,7 @@ class Player:
             ]
         else:  # black
             self.pieces = [
+                #King(self, all_squares['h6']),
                 Knight(self, all_squares['g4']),
                 Pawn(self, all_squares['g7']),
                 Queen(self, all_squares['d5'])
@@ -409,7 +413,7 @@ update_legal_moves()
 
 
 sprites = {}
-for piece in all_pieces:
+for ind, piece in enumerate(all_pieces):
     sprites[piece] = pygame.image.load(piece.sprite)
 
 def remove_piece(piece):

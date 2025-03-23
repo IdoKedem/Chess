@@ -53,14 +53,14 @@ class Piece:
         self.y = self.square.y
 
         self.type = type
-        if owner == 1:
+        if self.color == 1:
             self.str_color = 'White'
         else:
             self.str_color = 'Black'
 
         self.sprite = f'../Sprites/Pieces/{self.str_color}/{self.color}Chess_{self.type}.png'
 
-        self.legal_squares = set()
+        self.legal_squares: set[Square] = set()
 
     def __str__(self):
         return f"{self.str_color} {self.type} on {self.square}"

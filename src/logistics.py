@@ -10,7 +10,7 @@ cur_turn_player: Player = players_list[1] # white
 
 
 
-def get_dragged_piece():
+def get_dragged_piece() -> Piece:
     if any(filter(lambda piece: piece.is_dragged, all_pieces)):  # if there is already a dragged piece
         return get_cur_dragged_piece()
 
@@ -36,15 +36,12 @@ def get_cur_dragged_piece():
             return piece
 
 def drag(piece: Piece):
-    if not piece:
-        return
 
     mouse_x, mouse_y = pygame.mouse.get_pos()
     piece.x = mouse_x - piece.width / 2
     piece.y = mouse_y - piece.height / 2
 
     #print("dragging!")
-
 
 
 def move_piece(piece: Piece):
