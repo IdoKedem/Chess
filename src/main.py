@@ -27,6 +27,7 @@ class Window:
             coords = piece.x, piece.y
             self.window.blit(sprites[piece], coords)
         pygame.display.update()
+
     def mark_legal_squares(self, piece: Piece):
         # self.window.blit(self.square_marker, (0,0))
         # print('done')

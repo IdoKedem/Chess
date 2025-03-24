@@ -68,19 +68,19 @@ def move_piece(piece: Piece):
     piece.square.occupied_by = None
 
     print(f"moving {piece} to {desired_square}")
-
-    last_turn_player = cur_turn_player
+    just_played_player = cur_turn_player
     globals()['cur_turn_player']: Player = \
         players_list[
         int(not cur_turn_player.color)]  # change player's turn
+    next_move_player = cur_turn_player
 
     piece.square = desired_square
     piece.x, piece.y = desired_square.x, desired_square.y
     desired_square.occupied_by = piece
 
-    game_classes.update_legal_moves([last_turn_player])
-    look_for_checks(last_turn_player=last_turn_player,
-                    cur_turn_player=cur_turn_player)
+    game_classes.update_legal_moves([just_played_player])
+    look_for_checks(last_turn_player=just_played_player,
+                    cur_turn_player=next_move_player)
 
 
 def get_touched_square():

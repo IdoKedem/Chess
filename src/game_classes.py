@@ -79,15 +79,11 @@ class Rook(Piece):
         square_x = piece.x
         square_y = piece.y
 
-        is_check_row = False
-
         match direction:
             case 'w':
                 squares_range_x = range(square_x - 75, -1 * 75, -1 * 75)
-                is_check_row = True
             case 'e':
                 squares_range_x = range(square_x + 75, 8 * 75, 75)
-                is_check_row = True
             case 's':
                 squares_range_y = range(square_y + 75, 8 * 75, 75)
             case 'n':
@@ -95,26 +91,32 @@ class Rook(Piece):
             case _:
                 raise ValueError("direction must be 'n', 's', 'e' or 'w'")
 
-        if is_check_row:
+        if direction in ('w', 'e'):
             for cur_square_x in squares_range_x:
                 cur_square_coords = Square.get_coords_by_xy(cur_square_x, square_y)
                 cur_square = all_squares[cur_square_coords]
 
-                if cur_square.occupied_by:
-                    if cur_square.occupied_by.color != piece.color:
-                        legal_squares.add(cur_square)
-                    break
-                legal_squares.add(cur_square)
+                if not cur_square.occupied_by:
+                    legal_squares.add(cur_square)
+                else: # occupied square
+                    if cur_square.occupied_by.color == piece.color: # same player's piece
+                        break
+                    legal_squares.add(cur_square)
+                    if type(cur_square.occupied_by) != King:
+                        break   # allowing x-rays on the king
         else:
             for cur_square_y in squares_range_y:
                 cur_square_coords = Square.get_coords_by_xy(square_x, cur_square_y)
                 cur_square = all_squares[cur_square_coords]
 
-                if cur_square.occupied_by:
-                    if cur_square.occupied_by.color != piece.color:
-                        legal_squares.add(cur_square)
-                    break
-                legal_squares.add(cur_square)
+                if not cur_square.occupied_by:
+                    legal_squares.add(cur_square)
+                else: # occupied square
+                    if cur_square.occupied_by.color == piece.color: # same player's piece
+                        break
+                    legal_squares.add(cur_square)
+                    if type(cur_square.occupied_by) != King:
+                        break   # allowing x-rays on the king
         return legal_squares
 
 
@@ -147,16 +149,16 @@ class Bishop(Piece):
         match direction:
             case 'nw':
                 slope = 1
-                squares_range_x = range(square_x - 75, -1 * 75, -1 * 75)
+                squares_range_x = range(square_x - 75, -1 * 75, -1 * 75) # x-1 to x=0
             case 'ne':
                 slope = -1
-                squares_range_x = range(square_x + 75, 8 * 75, 75)
+                squares_range_x = range(square_x + 75, 8 * 75, 75) # x+1 to x=8
             case 'sw':
                 slope = -1
-                squares_range_x = range(square_x - 75, -1 * 75, -1 * 75)
+                squares_range_x = range(square_x - 75, -1 * 75, -1 * 75) # x-1 to x=0
             case 'se':
                 slope = 1
-                squares_range_x = range(square_x + 75, 8 * 75, 75)
+                squares_range_x = range(square_x + 75, 8 * 75, 75) # x+1 to x=8
             case _:
                 raise ValueError("direction must be 'nw', 'ne', 'sw' or 'se'")
 
@@ -166,12 +168,16 @@ class Bishop(Piece):
             square_coord = Square.get_coords_by_xy(cur_square_x, cur_square_y)
             if square_coord not in all_squares.keys():
                 break
-            square = all_squares[square_coord]
-            if square.occupied_by:
-                if square.occupied_by.color != piece.color:
-                    legal_squares.add(square)
-                break
-            legal_squares.add(square)
+            square_obj = all_squares[square_coord]
+
+            if not square_obj.occupied_by:
+                legal_squares.add(square_obj)
+            else:
+                if square_obj.occupied_by.color == piece.color:
+                    break
+                legal_squares.add(square_obj)
+                if type(square_obj.occupied_by) != King:
+                    break # allowing x-rays on the king
 
         return legal_squares
 
@@ -265,8 +271,6 @@ class King(Piece):
         legal_squares = set()
         possible_squares = set()
 
-        check_x_axis = False
-
         match direction:
             case 'n':
                 square_x = piece.square.x
@@ -275,17 +279,15 @@ class King(Piece):
                 square_x = piece.square.x
                 square_y = piece.square.y + 75 # select square below
             case 'e':
-                check_x_axis = True
                 square_x = piece.square.x + 75 # select square to the right
                 square_y = piece.square.y
             case 'w':
-                check_x_axis = True
                 square_x = piece.square.x - 75 # select square to the left
                 square_y = piece.square.y
             case _:
                 raise ValueError("direction must be 'n', 's', 'e' or 'w'")
 
-        if check_x_axis:
+        if direction in ('e', 'w'):
             for y_change in range(-1, 2):
                 square_coords = Square.get_coords_by_xy(square_x, square_y + 75 * y_change)
                 if square_coords in all_squares:
@@ -375,7 +377,7 @@ class Player:
                 #King(self, all_squares['h6']),
                 Knight(self, all_squares['g4']),
                 Pawn(self, all_squares['g7']),
-                Queen(self, all_squares['d5'])
+                Queen(self, all_squares['e6'])
             ]
         self.king = self.pieces[0]
         self.is_in_check = False
@@ -388,6 +390,9 @@ class Player:
                 piece.legal_squares)
     def get_all_legal_squares(self):
         return self.all_legal_squares
+
+    def __str__(self):
+        return self.name
 
 
 
